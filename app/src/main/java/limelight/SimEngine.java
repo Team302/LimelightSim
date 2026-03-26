@@ -74,11 +74,17 @@ public class SimEngine {
     }
 
     public void setRobotPose(double[] pose) {
-        this.m_robotPose = pose;
+        // Guarantee at least 3 elements
+        if (pose == null) return;
+        m_robotPose = new double[Math.max(3, pose.length)];
+        System.arraycopy(pose, 0, m_robotPose, 0, pose.length);
     }
 
     public void setCameraOffset(double[] offset) {
-        this.m_cameraOffset = offset;
+        // Guarantee at least 6 elements
+        if (offset == null) return;
+        m_cameraOffset = new double[Math.max(6, offset.length)];
+        System.arraycopy(offset, 0, m_cameraOffset, 0, offset.length);
     }
 
     public void addTarget(int id, double x, double y, double z) {
@@ -109,16 +115,16 @@ public class SimEngine {
         m_heartbeat++;
         Map<String, Object> data = new HashMap<>();
 
-        // Robot pose
-        double robotX = m_robotPose.length > 0 ? m_robotPose[0] : 0;
-        double robotY = m_robotPose.length > 1 ? m_robotPose[1] : 0;
-        double robotYaw = m_robotPose.length > 2 ? m_robotPose[2] : 0;
+        // Robot pose (guaranteed to be at least size 3 by the setter)
+        double robotX = m_robotPose[0];
+        double robotY = m_robotPose[1];
+        double robotYaw = m_robotPose[2];
 
-        // Camera offset
-        double offsetX = m_cameraOffset.length > 0 ? m_cameraOffset[0] : 0;
-        double offsetY = m_cameraOffset.length > 1 ? m_cameraOffset[1] : 0;
-        double offsetZ = m_cameraOffset.length > 2 ? m_cameraOffset[2] : 0;
-        double offsetYaw = m_cameraOffset.length > 3 ? m_cameraOffset[3] : 0;
+        // Camera offset (guaranteed to be at least size 6 by the setter)
+        double offsetX = m_cameraOffset[0];
+        double offsetY = m_cameraOffset[1];
+        double offsetZ = m_cameraOffset[2];
+        double offsetYaw = m_cameraOffset[3];
 
         // Compute camera field pose
         double rRad = Math.toRadians(robotYaw);
