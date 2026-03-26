@@ -7,13 +7,13 @@ import java.io.*;
 import java.util.Map;
 
 public class LimelightHttpHandler implements HttpHandler {
-    private SimEngine engine;
-    private NT4Publisher publisher;
-    private Gson gson = new Gson();
+    private SimEngine m_engine;
+    private NT4Publisher m_publisher;
+    private Gson m_gson = new Gson();
 
     public LimelightHttpHandler(SimEngine engine, NT4Publisher publisher) {
-        this.engine = engine;
-        this.publisher = publisher;
+        this.m_engine = engine;
+        this.m_publisher = publisher;
     }
 
     @Override
@@ -73,23 +73,23 @@ public class LimelightHttpHandler implements HttpHandler {
     }
 
     private void handleGetLatest(HttpExchange exchange) throws IOException {
-        Map<String, Object> data = engine.getNtData();
-        String json = gson.toJson(data);
+        Map<String, Object> data = m_engine.getNtData();
+        String json = m_gson.toJson(data);
         sendJsonResponse(exchange, 200, json);
     }
 
     private void handleGetConfig(HttpExchange exchange) throws IOException {
         Map<String, Object> config = new java.util.HashMap<>();
-        config.put("robot_pose", engine.getRobotPose());
-        config.put("camera_offset", engine.getCameraOffset());
-        config.put("targets", engine.getTargets());
-        config.put("detections", engine.getDetections());
-        config.put("classifications", engine.getClassifications());
-        config.put("barcodes", engine.getBarcodes());
-        config.put("imu", engine.getImuData());
-        config.put("name", publisher.getName());
+        config.put("robot_pose", m_engine.getRobotPose());
+        config.put("camera_offset", m_engine.getCameraOffset());
+        config.put("targets", m_engine.getTargets());
+        config.put("detections", m_engine.getDetections());
+        config.put("classifications", m_engine.getClassifications());
+        config.put("barcodes", m_engine.getBarcodes());
+        config.put("imu", m_engine.getImuData());
+        config.put("name", m_publisher.getName());
         
-        String json = gson.toJson(config);
+        String json = m_gson.toJson(config);
         sendJsonResponse(exchange, 200, json);
     }
 
@@ -104,7 +104,7 @@ public class LimelightHttpHandler implements HttpHandler {
         }
 
         try {
-            Map<String, Object> config = gson.fromJson(sb.toString(), Map.class);
+            Map<String, Object> config = m_gson.fromJson(sb.toString(), Map.class);
 
             if (config.containsKey("robot_pose")) {
                 Object pose = config.get("robot_pose");
@@ -114,7 +114,7 @@ public class LimelightHttpHandler implements HttpHandler {
                     for (int i = 0; i < poseList.size(); i++) {
                         robotPose[i] = ((Number) poseList.get(i)).doubleValue();
                     }
-                    engine.setRobotPose(robotPose);
+                    m_engine.setRobotPose(robotPose);
                 }
             }
 
@@ -126,16 +126,16 @@ public class LimelightHttpHandler implements HttpHandler {
                     for (int i = 0; i < offsetList.size(); i++) {
                         cameraOffset[i] = ((Number) offsetList.get(i)).doubleValue();
                     }
-                    engine.setCameraOffset(cameraOffset);
+                    m_engine.setCameraOffset(cameraOffset);
                 }
             }
 
-            engine.clearTargets();
+            m_engine.clearTargets();
             if (config.containsKey("targets")) {
                 java.util.List<?> targets = (java.util.List<?>) config.get("targets");
                 for (Object t : targets) {
                     Map<String, Object> target = (Map<String, Object>) t;
-                    engine.addTarget(
+                    m_engine.addTarget(
                             ((Number) target.get("id")).intValue(),
                             ((Number) target.get("x")).doubleValue(),
                             ((Number) target.get("y")).doubleValue(),
@@ -144,12 +144,12 @@ public class LimelightHttpHandler implements HttpHandler {
                 }
             }
 
-            engine.getDetections().clear();
+            m_engine.getDetections().clear();
             if (config.containsKey("detections")) {
                 java.util.List<?> detections = (java.util.List<?>) config.get("detections");
                 for (Object d : detections) {
                     Map<String, Object> det = (Map<String, Object>) d;
-                    engine.addDetection(
+                    m_engine.addDetection(
                             ((Number) det.get("classId")).intValue(),
                             (String) det.get("className"),
                             ((Number) det.get("confidence")).doubleValue(),
@@ -160,12 +160,12 @@ public class LimelightHttpHandler implements HttpHandler {
                 }
             }
 
-            engine.getClassifications().clear();
+            m_engine.getClassifications().clear();
             if (config.containsKey("classifications")) {
                 java.util.List<?> classifications = (java.util.List<?>) config.get("classifications");
                 for (Object c : classifications) {
                     Map<String, Object> clf = (Map<String, Object>) c;
-                    engine.addClassification(
+                    m_engine.addClassification(
                             ((Number) clf.get("classId")).intValue(),
                             (String) clf.get("className"),
                             ((Number) clf.get("confidence")).doubleValue()
@@ -173,12 +173,12 @@ public class LimelightHttpHandler implements HttpHandler {
                 }
             }
 
-            engine.getBarcodes().clear();
+            m_engine.getBarcodes().clear();
             if (config.containsKey("barcodes")) {
                 java.util.List<?> barcodes = (java.util.List<?>) config.get("barcodes");
                 for (Object b : barcodes) {
                     Map<String, Object> bc = (Map<String, Object>) b;
-                    engine.addBarcode(
+                    m_engine.addBarcode(
                             (String) bc.get("family"),
                             (String) bc.get("data"),
                             ((Number) bc.get("tx")).doubleValue(),
@@ -194,15 +194,15 @@ public class LimelightHttpHandler implements HttpHandler {
                 for (int i = 0; i < imuList.size(); i++) {
                     imu[i] = ((Number) imuList.get(i)).doubleValue();
                 }
-                engine.setImuData(imu);
+                m_engine.setImuData(imu);
             }
 
             if (config.containsKey("name")) {
-                String newName = (String) config.get("name");
-                publisher.setName(newName);
+                String name = (String) config.get("name");
+                m_publisher.setName(name);
             }
 
-            sendJsonResponse(exchange, 200, "{\"status\":\"success\"}");
+            sendJsonResponse(exchange, 200, "{\"status\":\"ok\"}");
         } catch (Exception e) {
             e.printStackTrace();
             sendResponse(exchange, 400, "Invalid request");

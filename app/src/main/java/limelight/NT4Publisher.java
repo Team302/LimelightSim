@@ -19,27 +19,27 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class NT4Publisher {
-    private boolean connected = false;
-    private Map<String, Object> latest_data = new java.util.HashMap<>();
-    private NetworkTableInstance inst;
-    private NetworkTable table;
-    private String name = "limelight";
-    private String serverIp;
-    private int serverPort;
+    private boolean m_connected = false;
+    private Map<String, Object> m_latest_data = new java.util.HashMap<>();
+    private NetworkTableInstance m_inst;
+    private NetworkTable m_table;
+    private String m_name = "limelight";
+    private String m_serverIp;
+    private int m_serverPort;
 
     // Cache for our publishers to prevent memory leaks and "maximum number of publishers" errors
-    private Map<String, Publisher> publishers = new HashMap<>();
-    private Map<String, Subscriber> subscribers = new HashMap<>();
+    private Map<String, Publisher> m_publishers = new HashMap<>();
+    private Map<String, Subscriber> m_subscribers = new HashMap<>();
 
     public NT4Publisher(String ip, int port) {
-        this.serverIp = ip;
-        this.serverPort = port;
-        inst = NetworkTableInstance.getDefault();
-        inst.startClient4(name);
-        inst.setServer(ip, port);
-        table = inst.getTable(name);
-        this.connected = true;
-        System.out.println("[NT4] Connecting to NT4 server at " + ip + ":" + port + " with name: " + name);
+        this.m_serverIp = ip;
+        this.m_serverPort = port;
+        m_inst = NetworkTableInstance.getDefault();
+        m_inst.startClient4(m_name);
+        m_inst.setServer(ip, port);
+        m_table = m_inst.getTable(m_name);
+        this.m_connected = true;
+        System.out.println("[NT4] Connecting to NT4 server at " + ip + ":" + port + " with name: " + m_name);
         
         initSubscribers();
     }
@@ -47,83 +47,83 @@ public class NT4Publisher {
     private void initSubscribers() {
         // Initialize Subscribers for all Limelight Controls
         // Basic Targeting Data
-        subscribers.put("tv", table.getDoubleTopic("tv").subscribe(0.0));
-        subscribers.put("tx", table.getDoubleTopic("tx").subscribe(0.0));
-        subscribers.put("ty", table.getDoubleTopic("ty").subscribe(0.0));
-        subscribers.put("txnc", table.getDoubleTopic("txnc").subscribe(0.0));
-        subscribers.put("tync", table.getDoubleTopic("tync").subscribe(0.0));
-        subscribers.put("ta", table.getDoubleTopic("ta").subscribe(0.0));
-        subscribers.put("tl", table.getDoubleTopic("tl").subscribe(0.0));
-        subscribers.put("cl", table.getDoubleTopic("cl").subscribe(0.0));
-        subscribers.put("t2d", table.getDoubleArrayTopic("t2d").subscribe(new double[0]));
-        subscribers.put("getpipe", table.getDoubleTopic("getpipe").subscribe(0.0));
-        subscribers.put("getpipetype", table.getStringTopic("getpipetype").subscribe(""));
-        subscribers.put("json", table.getStringTopic("json").subscribe(""));
-        subscribers.put("tc", table.getDoubleArrayTopic("tc").subscribe(new double[]{0,0,0}));
-        subscribers.put("hb", table.getDoubleTopic("hb").subscribe(0.0));
-        subscribers.put("hw", table.getDoubleArrayTopic("hw").subscribe(new double[]{0,0,0,0}));
-        subscribers.put("crosshairs", table.getDoubleArrayTopic("crosshairs").subscribe(new double[]{0,0,0,0}));
-        subscribers.put("tcclass", table.getStringTopic("tcclass").subscribe(""));
-        subscribers.put("tdclass", table.getStringTopic("tdclass").subscribe(""));
+        m_subscribers.put("tv", m_table.getDoubleTopic("tv").subscribe(0.0));
+        m_subscribers.put("tx", m_table.getDoubleTopic("tx").subscribe(0.0));
+        m_subscribers.put("ty", m_table.getDoubleTopic("ty").subscribe(0.0));
+        m_subscribers.put("txnc", m_table.getDoubleTopic("txnc").subscribe(0.0));
+        m_subscribers.put("tync", m_table.getDoubleTopic("tync").subscribe(0.0));
+        m_subscribers.put("ta", m_table.getDoubleTopic("ta").subscribe(0.0));
+        m_subscribers.put("tl", m_table.getDoubleTopic("tl").subscribe(0.0));
+        m_subscribers.put("cl", m_table.getDoubleTopic("cl").subscribe(0.0));
+        m_subscribers.put("t2d", m_table.getDoubleArrayTopic("t2d").subscribe(new double[0]));
+        m_subscribers.put("getpipe", m_table.getDoubleTopic("getpipe").subscribe(0.0));
+        m_subscribers.put("getpipetype", m_table.getStringTopic("getpipetype").subscribe(""));
+        m_subscribers.put("json", m_table.getStringTopic("json").subscribe(""));
+        m_subscribers.put("tc", m_table.getDoubleArrayTopic("tc").subscribe(new double[]{0,0,0}));
+        m_subscribers.put("hb", m_table.getDoubleTopic("hb").subscribe(0.0));
+        m_subscribers.put("hw", m_table.getDoubleArrayTopic("hw").subscribe(new double[]{0,0,0,0}));
+        m_subscribers.put("crosshairs", m_table.getDoubleArrayTopic("crosshairs").subscribe(new double[]{0,0,0,0}));
+        m_subscribers.put("tcclass", m_table.getStringTopic("tcclass").subscribe(""));
+        m_subscribers.put("tdclass", m_table.getStringTopic("tdclass").subscribe(""));
         
         // AprilTag and 3D Data
-        subscribers.put("botpose", table.getDoubleArrayTopic("botpose").subscribe(new double[11]));
-        subscribers.put("botpose_wpiblue", table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[11]));
-        subscribers.put("botpose_wpired", table.getDoubleArrayTopic("botpose_wpired").subscribe(new double[11]));
-        subscribers.put("botpose_orb", table.getDoubleArrayTopic("botpose_orb").subscribe(new double[11]));
-        subscribers.put("botpose_orb_wpiblue", table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[11]));
-        subscribers.put("botpose_orb_wpired", table.getDoubleArrayTopic("botpose_orb_wpired").subscribe(new double[11]));
-        subscribers.put("camerapose_targetspace", table.getDoubleArrayTopic("camerapose_targetspace").subscribe(new double[6]));
-        subscribers.put("targetpose_cameraspace", table.getDoubleArrayTopic("targetpose_cameraspace").subscribe(new double[6]));
-        subscribers.put("targetpose_robotspace", table.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[6]));
-        subscribers.put("botpose_targetspace", table.getDoubleArrayTopic("botpose_targetspace").subscribe(new double[6]));
-        subscribers.put("camerapose_robotspace", table.getDoubleArrayTopic("camerapose_robotspace").subscribe(new double[6]));
-        subscribers.put("tid", table.getDoubleTopic("tid").subscribe(-1.0));
-        subscribers.put("stddevs", table.getDoubleArrayTopic("stddevs").subscribe(new double[12]));
+        m_subscribers.put("botpose", m_table.getDoubleArrayTopic("botpose").subscribe(new double[11]));
+        m_subscribers.put("botpose_wpiblue", m_table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[11]));
+        m_subscribers.put("botpose_wpired", m_table.getDoubleArrayTopic("botpose_wpired").subscribe(new double[11]));
+        m_subscribers.put("botpose_orb", m_table.getDoubleArrayTopic("botpose_orb").subscribe(new double[11]));
+        m_subscribers.put("botpose_orb_wpiblue", m_table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[11]));
+        m_subscribers.put("botpose_orb_wpired", m_table.getDoubleArrayTopic("botpose_orb_wpired").subscribe(new double[11]));
+        m_subscribers.put("camerapose_targetspace", m_table.getDoubleArrayTopic("camerapose_targetspace").subscribe(new double[6]));
+        m_subscribers.put("targetpose_cameraspace", m_table.getDoubleArrayTopic("targetpose_cameraspace").subscribe(new double[6]));
+        m_subscribers.put("targetpose_robotspace", m_table.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[6]));
+        m_subscribers.put("botpose_targetspace", m_table.getDoubleArrayTopic("botpose_targetspace").subscribe(new double[6]));
+        m_subscribers.put("camerapose_robotspace", m_table.getDoubleArrayTopic("camerapose_robotspace").subscribe(new double[6]));
+        m_subscribers.put("tid", m_table.getDoubleTopic("tid").subscribe(-1.0));
+        m_subscribers.put("stddevs", m_table.getDoubleArrayTopic("stddevs").subscribe(new double[12]));
         
         // Camera Controls (Setters)
-        subscribers.put("ledMode", table.getDoubleTopic("ledMode").subscribe(0.0));
-        subscribers.put("camMode", table.getDoubleTopic("camMode").subscribe(0.0));
-        subscribers.put("pipeline", table.getDoubleTopic("pipeline").subscribe(0.0));
-        subscribers.put("stream", table.getDoubleTopic("stream").subscribe(0.0));
-        subscribers.put("snapshot", table.getDoubleTopic("snapshot").subscribe(0.0));
-        subscribers.put("crop", table.getDoubleArrayTopic("crop").subscribe(new double[]{0,0,0,0}));
-        subscribers.put("cropKeystone", table.getDoubleArrayTopic("cropKeystone").subscribe(new double[]{0,0}));
-        subscribers.put("frameskip", table.getDoubleTopic("frameskip").subscribe(0.0));
+        m_subscribers.put("ledMode", m_table.getDoubleTopic("ledMode").subscribe(0.0));
+        m_subscribers.put("camMode", m_table.getDoubleTopic("camMode").subscribe(0.0));
+        m_subscribers.put("pipeline", m_table.getDoubleTopic("pipeline").subscribe(0.0));
+        m_subscribers.put("stream", m_table.getDoubleTopic("stream").subscribe(0.0));
+        m_subscribers.put("snapshot", m_table.getDoubleTopic("snapshot").subscribe(0.0));
+        m_subscribers.put("crop", m_table.getDoubleArrayTopic("crop").subscribe(new double[]{0,0,0,0}));
+        m_subscribers.put("cropKeystone", m_table.getDoubleArrayTopic("cropKeystone").subscribe(new double[]{0,0}));
+        m_subscribers.put("frameskip", m_table.getDoubleTopic("frameskip").subscribe(0.0));
         
         // Video Recording Controls
-        subscribers.put("rewind_enable", table.getDoubleTopic("rewind_enable").subscribe(0.0));
-        subscribers.put("rewind_capture", table.getDoubleArrayTopic("rewind_capture").subscribe(new double[]{0,0}));
+        m_subscribers.put("rewind_enable", m_table.getDoubleTopic("rewind_enable").subscribe(0.0));
+        m_subscribers.put("rewind_capture", m_table.getDoubleArrayTopic("rewind_capture").subscribe(new double[]{0,0}));
         
         // AprilTag and 3D Data (Setters)
-        subscribers.put("camerapose_robotspace_set", table.getDoubleArrayTopic("camerapose_robotspace_set").subscribe(new double[]{0,0,0,0,0,0}));
-        subscribers.put("priorityid", table.getDoubleTopic("priorityid").subscribe(0.0));
-        subscribers.put("robot_orientation_set", table.getDoubleArrayTopic("robot_orientation_set").subscribe(new double[]{0,0,0,0,0,0}));
-        subscribers.put("fiducial_id_filters_set", table.getDoubleArrayTopic("fiducial_id_filters_set").subscribe(new double[0]));
-        subscribers.put("fiducial_offset_set", table.getDoubleArrayTopic("fiducial_offset_set").subscribe(new double[]{0,0,0}));
-        subscribers.put("fiducial_downscale_set", table.getDoubleTopic("fiducial_downscale_set").subscribe(0.0));
+        m_subscribers.put("camerapose_robotspace_set", m_table.getDoubleArrayTopic("camerapose_robotspace_set").subscribe(new double[]{0,0,0,0,0,0}));
+        m_subscribers.put("priorityid", m_table.getDoubleTopic("priorityid").subscribe(0.0));
+        m_subscribers.put("robot_orientation_set", m_table.getDoubleArrayTopic("robot_orientation_set").subscribe(new double[]{0,0,0,0,0,0}));
+        m_subscribers.put("fiducial_id_filters_set", m_table.getDoubleArrayTopic("fiducial_id_filters_set").subscribe(new double[0]));
+        m_subscribers.put("fiducial_offset_set", m_table.getDoubleArrayTopic("fiducial_offset_set").subscribe(new double[]{0,0,0}));
+        m_subscribers.put("fiducial_downscale_set", m_table.getDoubleTopic("fiducial_downscale_set").subscribe(0.0));
         
         // IMU Data
-        subscribers.put("imu", table.getDoubleArrayTopic("imu").subscribe(new double[10]));
+        m_subscribers.put("imu", m_table.getDoubleArrayTopic("imu").subscribe(new double[10]));
         
         // IMU Controls
-        subscribers.put("imumode_set", table.getDoubleTopic("imumode_set").subscribe(0.0));
-        subscribers.put("imuassistalpha_set", table.getDoubleTopic("imuassistalpha_set").subscribe(0.001));
+        m_subscribers.put("imumode_set", m_table.getDoubleTopic("imumode_set").subscribe(0.0));
+        m_subscribers.put("imuassistalpha_set", m_table.getDoubleTopic("imuassistalpha_set").subscribe(0.001));
         
         // Python
-        subscribers.put("llpython", table.getDoubleArrayTopic("llpython").subscribe(new double[0]));
-        subscribers.put("llrobot", table.getDoubleArrayTopic("llrobot").subscribe(new double[0]));
+        m_subscribers.put("llpython", m_table.getDoubleArrayTopic("llpython").subscribe(new double[0]));
+        m_subscribers.put("llrobot", m_table.getDoubleArrayTopic("llrobot").subscribe(new double[0]));
         
         // Raw Data
-        subscribers.put("tcornxy", table.getDoubleArrayTopic("tcornxy").subscribe(new double[0]));
-        subscribers.put("rawtargets", table.getDoubleArrayTopic("rawtargets").subscribe(new double[0]));
-        subscribers.put("rawfiducials", table.getDoubleArrayTopic("rawfiducials").subscribe(new double[0]));
-        subscribers.put("rawdetections", table.getDoubleArrayTopic("rawdetections").subscribe(new double[0]));
-        subscribers.put("rawbarcodes", table.getStringArrayTopic("rawbarcodes").subscribe(new String[0]));
+        m_subscribers.put("tcornxy", m_table.getDoubleArrayTopic("tcornxy").subscribe(new double[0]));
+        m_subscribers.put("rawtargets", m_table.getDoubleArrayTopic("rawtargets").subscribe(new double[0]));
+        m_subscribers.put("rawfiducials", m_table.getDoubleArrayTopic("rawfiducials").subscribe(new double[0]));
+        m_subscribers.put("rawdetections", m_table.getDoubleArrayTopic("rawdetections").subscribe(new double[0]));
+        m_subscribers.put("rawbarcodes", m_table.getStringArrayTopic("rawbarcodes").subscribe(new String[0]));
     }
 
     public void publishData(Map<String, Object> data) {
-        this.latest_data = data;
+        this.m_latest_data = data;
         
         // Ensure publishers are created once and reused to avoid memory leaks
         for (Map.Entry<String, Object> entry : data.entrySet()) {
@@ -131,33 +131,33 @@ public class NT4Publisher {
             Object value = entry.getValue();
             
             if (value instanceof Double) {
-                DoublePublisher pub = (DoublePublisher) publishers.computeIfAbsent(key, k -> {
-                    if (k.startsWith("/")) return inst.getDoubleTopic(k).publish();
-                    return table.getDoubleTopic(k).publish();
+                DoublePublisher pub = (DoublePublisher) m_publishers.computeIfAbsent(key, k -> {
+                    if (k.startsWith("/")) return m_inst.getDoubleTopic(k).publish();
+                    return m_table.getDoubleTopic(k).publish();
                 });
                 pub.set((Double) value);
             } else if (value instanceof Integer) {
-                IntegerPublisher pub = (IntegerPublisher) publishers.computeIfAbsent(key, k -> {
-                    if (k.startsWith("/")) return inst.getIntegerTopic(k).publish();
-                    return table.getIntegerTopic(k).publish();
+                IntegerPublisher pub = (IntegerPublisher) m_publishers.computeIfAbsent(key, k -> {
+                    if (k.startsWith("/")) return m_inst.getIntegerTopic(k).publish();
+                    return m_table.getIntegerTopic(k).publish();
                 });
                 pub.set((Integer) value);
             } else if (value instanceof String) {
-                StringPublisher pub = (StringPublisher) publishers.computeIfAbsent(key, k -> {
-                    if (k.startsWith("/")) return inst.getStringTopic(k).publish();
-                    return table.getStringTopic(k).publish();
+                StringPublisher pub = (StringPublisher) m_publishers.computeIfAbsent(key, k -> {
+                    if (k.startsWith("/")) return m_inst.getStringTopic(k).publish();
+                    return m_table.getStringTopic(k).publish();
                 });
                 pub.set((String) value);
             } else if (value instanceof double[]) {
-                DoubleArrayPublisher pub = (DoubleArrayPublisher) publishers.computeIfAbsent(key, k -> {
-                    if (k.startsWith("/")) return inst.getDoubleArrayTopic(k).publish();
-                    return table.getDoubleArrayTopic(k).publish();
+                DoubleArrayPublisher pub = (DoubleArrayPublisher) m_publishers.computeIfAbsent(key, k -> {
+                    if (k.startsWith("/")) return m_inst.getDoubleArrayTopic(k).publish();
+                    return m_table.getDoubleArrayTopic(k).publish();
                 });
                 pub.set((double[]) value);
             } else if (value instanceof String[]) {
-                StringArrayPublisher pub = (StringArrayPublisher) publishers.computeIfAbsent(key, k -> {
-                    if (k.startsWith("/")) return inst.getStringArrayTopic(k).publish();
-                    return table.getStringArrayTopic(k).publish();
+                StringArrayPublisher pub = (StringArrayPublisher) m_publishers.computeIfAbsent(key, k -> {
+                    if (k.startsWith("/")) return m_inst.getStringArrayTopic(k).publish();
+                    return m_table.getStringArrayTopic(k).publish();
                 });
                 pub.set((String[]) value);
             }
@@ -165,32 +165,32 @@ public class NT4Publisher {
     }
 
     public boolean isConnected() {
-        return inst.isConnected();
+        return m_inst.isConnected();
     }
 
     public Map<String, Object> getLatestData() {
-        return latest_data;
+        return m_latest_data;
     }
 
     public String getName() {
-        return name;
+        return m_name;
     }
 
     public void setName(String name) {
-        if (!this.name.equals(name)) {
-            this.name = name;
+        if (!this.m_name.equals(name)) {
+            this.m_name = name;
             System.out.println("[NT4] Name updated to: " + name + ", restarting...");
             
-            for (Publisher pub : publishers.values()) pub.close();
-            for (Subscriber sub : subscribers.values()) sub.close();
-            publishers.clear();
-            subscribers.clear();
+            for (Publisher pub : m_publishers.values()) pub.close();
+            for (Subscriber sub : m_subscribers.values()) sub.close();
+            m_publishers.clear();
+            m_subscribers.clear();
             
-            inst.stopClient();
-            inst.startClient4(name);
-            inst.setServer(serverIp, serverPort);
+            m_inst.stopClient();
+            m_inst.startClient4(m_name);
+            m_inst.setServer(m_serverIp, m_serverPort);
             
-            table = inst.getTable(name);
+            m_table = m_inst.getTable(m_name);
             initSubscribers();
         }
     }

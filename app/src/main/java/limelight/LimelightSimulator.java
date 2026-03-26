@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class LimelightSimulator {
     private static final int[] PORTS_TO_TRY = {5801, 5805, 5809, 8080, 8000};
-    private static int frameCounter = 0;
+    private static int m_frameCounter = 0;
 
     public static void main(String[] args) {
         SimEngine engine = new SimEngine();
@@ -42,7 +42,7 @@ public class LimelightSimulator {
             try {
                 Map<String, Object> data = engine.getNtData();
                 publisher.publishData(data);
-                frameCounter++;
+                m_frameCounter++;
                 Thread.sleep(20);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
