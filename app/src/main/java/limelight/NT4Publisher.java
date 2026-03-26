@@ -23,19 +23,28 @@ public class NT4Publisher {
     private Map<String, Object> latest_data = new java.util.HashMap<>();
     private NetworkTableInstance inst;
     private NetworkTable table;
+    private String name = "limelight";
+    private String serverIp;
+    private int serverPort;
 
     // Cache for our publishers to prevent memory leaks and "maximum number of publishers" errors
     private Map<String, Publisher> publishers = new HashMap<>();
     private Map<String, Subscriber> subscribers = new HashMap<>();
 
     public NT4Publisher(String ip, int port) {
+        this.serverIp = ip;
+        this.serverPort = port;
         inst = NetworkTableInstance.getDefault();
-        inst.startClient4("LimelightSimulator");
+        inst.startClient4(name);
         inst.setServer(ip, port);
-        table = inst.getTable("limelight");
+        table = inst.getTable(name);
         this.connected = true;
-        System.out.println("[NT4] Connecting to NT4 server at " + ip + ":" + port);
+        System.out.println("[NT4] Connecting to NT4 server at " + ip + ":" + port + " with name: " + name);
         
+        initSubscribers();
+    }
+    
+    private void initSubscribers() {
         // Initialize Subscribers for all Limelight Controls
         // Basic Targeting Data
         subscribers.put("tv", table.getDoubleTopic("tv").subscribe(0.0));
@@ -161,5 +170,28 @@ public class NT4Publisher {
 
     public Map<String, Object> getLatestData() {
         return latest_data;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (!this.name.equals(name)) {
+            this.name = name;
+            System.out.println("[NT4] Name updated to: " + name + ", restarting...");
+            
+            for (Publisher pub : publishers.values()) pub.close();
+            for (Subscriber sub : subscribers.values()) sub.close();
+            publishers.clear();
+            subscribers.clear();
+            
+            inst.stopClient();
+            inst.startClient4(name);
+            inst.setServer(serverIp, serverPort);
+            
+            table = inst.getTable(name);
+            initSubscribers();
+        }
     }
 }

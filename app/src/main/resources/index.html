@@ -408,9 +408,6 @@
                         <div class="metric"><div class="label">clf class</div><div class="value" id="m_tcclass">-</div></div>
                         <div class="metric"><div class="label">pipeline type</div><div class="value" id="m_pipetype">-</div></div>
                     </div>
-                    <div class="btn-row">
-                        <button id="btnRefreshNow">Refresh now</button>
-                    </div>
                 </section>
 
                 <section class="card span-4">
@@ -439,6 +436,16 @@
 
         <div id="tab-robot" class="tab-content">
             <div class="grid">
+                <section class="card span-12">
+                    <h2>Settings</h2>
+                    <div class="form-grid">
+                        <div class="field">
+                            <label>NetworkTable / Client Name</label>
+                            <input type="text" id="nt_name" />
+                        </div>
+                    </div>
+                </section>
+
                 <section class="card span-6">
                     <h2>Robot Pose</h2>
                     <div class="form-grid">
@@ -516,8 +523,6 @@
         <section class="card" style="margin-top: 14px;">
             <h2>Configuration Control</h2>
             <div class="btn-row">
-                <button class="btn-primary" id="applyBtn">Apply Configuration</button>
-                <button id="reloadBtn">Reload From Server</button>
                 <button class="btn-danger" id="clearAllBtn">Clear All Lists</button>
             </div>
             <div id="message" class="message"></div>
@@ -545,6 +550,8 @@
         const fmt = (v, d = 2) => Number.isFinite(Number(v)) ? Number(v).toFixed(d) : "0.00";
 
         function showMessage(type, text) {
+            // Disabled successful config saving notifications because they happen often
+            if (type === "success") return;
             const el = $("message");
             el.className = `message ${type}`;
             el.textContent = text;
@@ -592,6 +599,10 @@
                 const el = $(`imu_${i}`);
                 if (el) el.value = num(v);
             });
+            
+            if ($("nt_name")) {
+                $("nt_name").value = config.name || "limelight";
+            }
         }
 
         function updateConfigFromStaticInputs() {
@@ -611,6 +622,10 @@
             ];
 
             config.imu = Array.from({ length: 10 }, (_, i) => num($("imu_" + i).value));
+            
+            if ($("nt_name")) {
+                config.name = $("nt_name").value || "limelight";
+            }
         }
 
         function renderTargets() {
@@ -749,6 +764,7 @@
             updateConfigFromStaticInputs();
             collectListInputs();
             return {
+                name: String(config.name || "limelight"),
                 robot_pose: (config.robot_pose || []).slice(0, 3).map((x) => num(x)),
                 camera_offset: (config.camera_offset || []).slice(0, 6).map((x) => num(x)),
                 imu: (config.imu || []).slice(0, 10).map((x) => num(x)),
@@ -949,6 +965,13 @@
             });
         }
 
+        setInterval(async () => {
+            await Promise.all([
+                refreshLatest(),
+                sendConfiguration()
+            ]);
+        }, 100);
+
         function initTabs() {
             document.querySelectorAll(".tab-link").forEach((b) => {
                 b.addEventListener("click", () => openTab(b.dataset.tab));
@@ -956,8 +979,6 @@
         }
 
         function initActions() {
-            $("applyBtn").addEventListener("click", sendConfiguration);
-            $("reloadBtn").addEventListener("click", loadConfiguration);
             $("clearAllBtn").addEventListener("click", () => {
                 collectListInputs();
                 config.targets = [];
@@ -965,8 +986,8 @@
                 config.classifications = [];
                 config.barcodes = [];
                 renderAllLists();
+                sendConfiguration(); // Immediately send when clearing
             });
-            $("btnRefreshNow").addEventListener("click", refreshLatest);
 
             $("importFmapBtn").addEventListener("click", () => $("fmapInput").click());
             $("fmapInput").addEventListener("change", importFmap);
@@ -977,11 +998,20 @@
             initTabs();
             initActions();
             wireListButtons();
+            
+            // Add listeners to input elements to auto-send on change
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('change', () => {
+                    sendConfiguration();
+                });
+            });
+            
             updateStaticInputsFromConfig();
             renderAllLists();
-            loadConfiguration();
-            refreshLatest();
-            setInterval(refreshLatest, 200);
+            loadConfiguration().then(() => {
+                // Ensure initial state represents the first load
+                refreshLatest();
+            });
         }
 
         document.addEventListener("DOMContentLoaded", bootstrap);

@@ -87,6 +87,7 @@ public class LimelightHttpHandler implements HttpHandler {
         config.put("classifications", engine.getClassifications());
         config.put("barcodes", engine.getBarcodes());
         config.put("imu", engine.getImuData());
+        config.put("name", publisher.getName());
         
         String json = gson.toJson(config);
         sendJsonResponse(exchange, 200, json);
@@ -194,6 +195,11 @@ public class LimelightHttpHandler implements HttpHandler {
                     imu[i] = ((Number) imuList.get(i)).doubleValue();
                 }
                 engine.setImuData(imu);
+            }
+
+            if (config.containsKey("name")) {
+                String newName = (String) config.get("name");
+                publisher.setName(newName);
             }
 
             sendJsonResponse(exchange, 200, "{\"status\":\"success\"}");
