@@ -184,7 +184,8 @@ public class SimEngine {
         }
 
         // Basic targeting data
-        data.put("tv", (m_targets.isEmpty() && m_detections.isEmpty()) ? 0.0 : 1.0);
+        boolean hasTargets = !m_targets.isEmpty() || !m_detections.isEmpty() || !m_barcodes.isEmpty() || !m_classifications.isEmpty();
+        data.put("tv", hasTargets ? 1.0 : 0.0);
         data.put("tx", tx);
         data.put("ty", ty);
         data.put("txnc", txnc);
@@ -197,7 +198,7 @@ public class SimEngine {
         double detClass = m_detections.isEmpty() ? 0.0 : m_detections.get(0).classId;
         double clfClass = m_classifications.isEmpty() ? 0.0 : m_classifications.get(0).classId;
         data.put("t2d", new double[]{
-            m_targets.isEmpty() ? 0.0 : 1.0, 
+            hasTargets ? 1.0 : 0.0, 
             targetCount, 
             1.5, 2.0, 
             tx, ty, txnc, tync, ta, tid, 

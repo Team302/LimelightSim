@@ -45,41 +45,7 @@ public class NT4Publisher {
     }
     
     private void initSubscribers() {
-        // Initialize Subscribers for all Limelight Controls
-        // Basic Targeting Data
-        m_subscribers.put("tv", m_table.getDoubleTopic("tv").subscribe(0.0));
-        m_subscribers.put("tx", m_table.getDoubleTopic("tx").subscribe(0.0));
-        m_subscribers.put("ty", m_table.getDoubleTopic("ty").subscribe(0.0));
-        m_subscribers.put("txnc", m_table.getDoubleTopic("txnc").subscribe(0.0));
-        m_subscribers.put("tync", m_table.getDoubleTopic("tync").subscribe(0.0));
-        m_subscribers.put("ta", m_table.getDoubleTopic("ta").subscribe(0.0));
-        m_subscribers.put("tl", m_table.getDoubleTopic("tl").subscribe(0.0));
-        m_subscribers.put("cl", m_table.getDoubleTopic("cl").subscribe(0.0));
-        m_subscribers.put("t2d", m_table.getDoubleArrayTopic("t2d").subscribe(new double[0]));
-        m_subscribers.put("getpipe", m_table.getDoubleTopic("getpipe").subscribe(0.0));
-        m_subscribers.put("getpipetype", m_table.getStringTopic("getpipetype").subscribe(""));
-        m_subscribers.put("json", m_table.getStringTopic("json").subscribe(""));
-        m_subscribers.put("tc", m_table.getDoubleArrayTopic("tc").subscribe(new double[]{0,0,0}));
-        m_subscribers.put("hb", m_table.getDoubleTopic("hb").subscribe(0.0));
-        m_subscribers.put("hw", m_table.getDoubleArrayTopic("hw").subscribe(new double[]{0,0,0,0}));
-        m_subscribers.put("crosshairs", m_table.getDoubleArrayTopic("crosshairs").subscribe(new double[]{0,0,0,0}));
-        m_subscribers.put("tcclass", m_table.getStringTopic("tcclass").subscribe(""));
-        m_subscribers.put("tdclass", m_table.getStringTopic("tdclass").subscribe(""));
-        
-        // AprilTag and 3D Data
-        m_subscribers.put("botpose", m_table.getDoubleArrayTopic("botpose").subscribe(new double[11]));
-        m_subscribers.put("botpose_wpiblue", m_table.getDoubleArrayTopic("botpose_wpiblue").subscribe(new double[11]));
-        m_subscribers.put("botpose_wpired", m_table.getDoubleArrayTopic("botpose_wpired").subscribe(new double[11]));
-        m_subscribers.put("botpose_orb", m_table.getDoubleArrayTopic("botpose_orb").subscribe(new double[11]));
-        m_subscribers.put("botpose_orb_wpiblue", m_table.getDoubleArrayTopic("botpose_orb_wpiblue").subscribe(new double[11]));
-        m_subscribers.put("botpose_orb_wpired", m_table.getDoubleArrayTopic("botpose_orb_wpired").subscribe(new double[11]));
-        m_subscribers.put("camerapose_targetspace", m_table.getDoubleArrayTopic("camerapose_targetspace").subscribe(new double[6]));
-        m_subscribers.put("targetpose_cameraspace", m_table.getDoubleArrayTopic("targetpose_cameraspace").subscribe(new double[6]));
-        m_subscribers.put("targetpose_robotspace", m_table.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[6]));
-        m_subscribers.put("botpose_targetspace", m_table.getDoubleArrayTopic("botpose_targetspace").subscribe(new double[6]));
-        m_subscribers.put("camerapose_robotspace", m_table.getDoubleArrayTopic("camerapose_robotspace").subscribe(new double[6]));
-        m_subscribers.put("tid", m_table.getDoubleTopic("tid").subscribe(-1.0));
-        m_subscribers.put("stddevs", m_table.getDoubleArrayTopic("stddevs").subscribe(new double[12]));
+        // Initialize Subscribers for all Limelight Controls (Setters)
         
         // Camera Controls (Setters)
         m_subscribers.put("ledMode", m_table.getDoubleTopic("ledMode").subscribe(0.0));
@@ -109,17 +75,6 @@ public class NT4Publisher {
         // IMU Controls
         m_subscribers.put("imumode_set", m_table.getDoubleTopic("imumode_set").subscribe(0.0));
         m_subscribers.put("imuassistalpha_set", m_table.getDoubleTopic("imuassistalpha_set").subscribe(0.001));
-        
-        // Python
-        m_subscribers.put("llpython", m_table.getDoubleArrayTopic("llpython").subscribe(new double[0]));
-        m_subscribers.put("llrobot", m_table.getDoubleArrayTopic("llrobot").subscribe(new double[0]));
-        
-        // Raw Data
-        m_subscribers.put("tcornxy", m_table.getDoubleArrayTopic("tcornxy").subscribe(new double[0]));
-        m_subscribers.put("rawtargets", m_table.getDoubleArrayTopic("rawtargets").subscribe(new double[0]));
-        m_subscribers.put("rawfiducials", m_table.getDoubleArrayTopic("rawfiducials").subscribe(new double[0]));
-        m_subscribers.put("rawdetections", m_table.getDoubleArrayTopic("rawdetections").subscribe(new double[0]));
-        m_subscribers.put("rawbarcodes", m_table.getStringArrayTopic("rawbarcodes").subscribe(new String[0]));
     }
 
     public void publishData(Map<String, Object> data) {
@@ -136,12 +91,12 @@ public class NT4Publisher {
                     return m_table.getDoubleTopic(k).publish();
                 });
                 pub.set((Double) value);
-            } else if (value instanceof Integer) {
+            } else if (value instanceof Integer || value instanceof Long) {
                 IntegerPublisher pub = (IntegerPublisher) m_publishers.computeIfAbsent(key, k -> {
                     if (k.startsWith("/")) return m_inst.getIntegerTopic(k).publish();
                     return m_table.getIntegerTopic(k).publish();
                 });
-                pub.set((Integer) value);
+                pub.set(((Number) value).longValue());
             } else if (value instanceof String) {
                 StringPublisher pub = (StringPublisher) m_publishers.computeIfAbsent(key, k -> {
                     if (k.startsWith("/")) return m_inst.getStringTopic(k).publish();
