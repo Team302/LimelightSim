@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Limelight 4 Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 48px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #2a5298;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .input-group.full {
+            grid-template-columns: 1fr;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(42, 82, 152, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #f0f0f0;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        button.secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .array-item {
+            background: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #2a5298;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .array-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .array-item-title {
+            font-weight: 600;
+            color: #2a5298;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            padding: 6px 12px;
+            font-size: 0.85em;
+            width: auto;
+        }
+
+        .remove-btn:hover {
+            background: #ee5a52;
+        }
+
+        .add-btn {
+            background: #51cf66;
+            margin-top: 10px;
+        }
+
+        .add-btn:hover {
+            background: #40c057;
+        }
+
+        .status-section {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .status-value {
+            color: #2a5298;
+            font-weight: 500;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #0d47a1;
+            margin-bottom: 15px;
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .tab-link {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.05em;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .tab-link:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab-link.active {
+            background: white;
+            color: #2a5298;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎥 Limelight 4 Simulator</h1>
+            <p>Vision Target and AprilTag Configuration Interface</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-link active" onclick="openTab('tab-robot', this)">🤖 Robot & IMU</button>
+            <button class="tab-link" onclick="openTab('tab-apriltags', this)">🏷️ AprilTags</button>
+            <button class="tab-link" onclick="openTab('tab-detections', this)">👁️ Detections</button>
+            <button class="tab-link" onclick="openTab('tab-classifications', this)">🏷️ Classifications</button>
+            <button class="tab-link" onclick="openTab('tab-barcodes', this)">📱 Barcodes</button>
+        </div>
+
+        <div id="tab-robot" class="tab-content active">
+            <div class="grid">
+            <!-- Robot Pose Card -->
+            <div class="card">
+                <h2>🤖 Robot Setup</h2>
+                <div class="info-box">
+                    Set the Robot's Field Pose and the Camera's Offset relative to the robot to automatically calculate the robot's field position output in NetworkTables.
+                </div>
+                <!-- Robot Field Pose -->
+                <h3 style="font-size: 1.1em; color: #555; margin-bottom: 10px;">Robot Field Pose</h3>
+                <div class="input-group">
+                    <div class="form-group">
+                        <label>Robot X (meters)</label>
+                        <input type="number" id="robotX" value="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Robot Y (meters)</label>
+                        <input type="number" id="robotY" value="0" step="0.1">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Robot Heading (degrees)</label>
+                    <input type="number" id="robotYaw" value="0" step="0.1">
+                </div>
+                
+                <h3 style="font-size: 1.1em; color: #555; margin-top: 15px; margin-bottom: 10px;">Camera Offset (From Robot Center)</h3>
+                <div class="input-group">
+                    <div class="form-group">
+                        <label>Offset X (Forward, m)</label>
+                        <input type="number" id="camOffsetX" value="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Offset Y (Left, m)</label>
+                        <input type="number" id="camOffsetY" value="0" step="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="form-group">
+                        <label>Offset Z (Up, m)</label>
+                        <input type="number" id="camOffsetZ" value="0.5" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Camera Yaw (degrees)</label>
+                        <input type="number" id="camOffsetYaw" value="0" step="0.1">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <div class="form-group">
+                        <label>Camera Pitch (degrees)</label>
+                        <input type="number" id="camOffsetPitch" value="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Camera Roll (degrees)</label>
+                        <input type="number" id="camOffsetRoll" value="0" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- IMU Data Card -->
+            <div class="card">
+                <h2>📊 IMU Data</h2>
+                <div class="info-box">
+                    Configure Inertial Measurement Unit readings (gyro, accel, etc).
+                </div>
+                <div class="form-group">
+                    <label>Yaw (degrees)</label>
+                    <input type="number" id="imuYaw" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Pitch (degrees)</label>
+                    <input type="number" id="imuPitch" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Roll (degrees)</label>
+                    <input type="number" id="imuRoll" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Gyro X (deg/s)</label>
+                    <input type="number" id="imuGyroX" value="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Gyro Y (deg/s)</label>
+                    <input type="number" id="imuGyroY" value="0" step="0.1">
+                </div>
+                  <div class="form-group">
+                      <label>Gyro Z (deg/s)</label>
+                      <input type="number" id="imuGyroZ" value="0" step="0.1">
+                  </div>
+              </div>
+              </div>
+          </div>        <div id="tab-apriltags" class="tab-content">
+            <!-- AprilTags Card -->
+            <div class="card full-width-card">
+            <h2>🏷️ AprilTag Targets</h2>
+            <div class="info-box" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Define AprilTag targets that the camera will detect or import a WPILib/Limelight .fmap map file.</span>
+                <div>
+                    <input type="file" id="fmapInput" accept=".fmap,.json" style="display: none;" onchange="importFmap(event)">
+                    <button class="secondary" style="margin-top: 0; padding: 6px 12px; font-size: 0.9em;" onclick="document.getElementById('fmapInput').click()">📁 Import .fmap Object</button>
+                </div>
+            </div>
+            <div id="targetsList"></div>
+            <button class="add-btn" onclick="addTarget()">+ Add Target</button>
+            </div>
+        </div>
+
+        <div id="tab-detections" class="tab-content">
+            <!-- Detections Card -->
+            <div class="card full-width-card">
+            <h2>👁️ Object Detections</h2>
+            <div class="info-box">
+                Configure detected objects (e.g., game pieces, obstacles).
+            </div>
+            <div id="detectionsList"></div>
+            <button class="add-btn" onclick="addDetection()">+ Add Detection</button>
+            </div>
+        </div>
+
+        <div id="tab-classifications" class="tab-content">
+            <!-- Classifications Card -->
+            <div class="card full-width-card">
+            <h2>🏷️ Classifications</h2>
+            <div class="info-box">
+                Set object classifications with confidence scores.
+            </div>
+            <div id="classificationsList"></div>
+            <button class="add-btn" onclick="addClassification()">+ Add Classification</button>
+            </div>
+        </div>
+
+        <div id="tab-barcodes" class="tab-content">
+            <!-- Barcodes Card -->
+            <div class="card full-width-card">
+            <h2>📱 Barcodes</h2>
+            <div class="info-box">
+                Configure barcode/AprilTag data for simulation.
+            </div>
+            <div id="barcodesList"></div>
+            <button class="add-btn" onclick="addBarcode()">+ Add Barcode</button>
+            </div>
+        </div>
+
+        <!-- Control Card (Always Visible) -->
+        <div class="card full-width-card" style="margin-top: 20px;">
+            <div class="success-message" id="successMessage">✓ Configuration updated successfully!</div>
+            <div class="error-message" id="errorMessage">✗ Error updating configuration</div>
+            <div class="input-group full">
+                <button onclick="sendConfiguration()">📤 Send Configuration</button>
+                <button class="secondary" onclick="loadConfiguration()">📥 Load Current Data</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structures
+        let config = {
+            robot_pose: [0, 0, 0], // X, Y, Yaw
+            camera_offset: [0, 0, 0.5, 0, 0, 0], // X, Y, Z, Yaw, Pitch, Roll
+            imu: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            targets: [],
+            detections: [],
+            classifications: [],
+            barcodes: []
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfiguration();
+        });
+
+        function loadConfiguration() {
+            fetch('/api/config')
+                .then(response => response.json())
+                .then(data => {
+                    // Merge the fetched config with the existing config to preserve structure
+                    if (data.robot_pose) config.robot_pose = data.robot_pose;
+                    if (data.camera_offset) config.camera_offset = data.camera_offset;
+                    if (data.targets) config.targets = data.targets;
+                    if (data.detections) config.detections = data.detections;
+                    if (data.classifications) config.classifications = data.classifications;
+                    if (data.barcodes) config.barcodes = data.barcodes;
+                    if (data.imu) config.imu = data.imu;
+                    updateUI();
+                    showMessage('success', 'Configuration loaded!');
+                })
+                .catch(error => {
+                    console.error('Error loading configuration:', error);
+                    // If load fails, just initialize with defaults (already in config object)
+                    updateUI();
+                });
+        }
+
+        function updateUI() {
+            // Robot Pose and Camera Offset
+            if (config.robot_pose && config.robot_pose.length >= 3) {
+                document.getElementById('robotX').value = config.robot_pose[0];
+                document.getElementById('robotY').value = config.robot_pose[1];
+                document.getElementById('robotYaw').value = config.robot_pose[2];
+            }
+            if (config.camera_offset && config.camera_offset.length >= 6) {
+                document.getElementById('camOffsetX').value = config.camera_offset[0];
+                document.getElementById('camOffsetY').value = config.camera_offset[1];
+                document.getElementById('camOffsetZ').value = config.camera_offset[2];
+                document.getElementById('camOffsetYaw').value = config.camera_offset[3];
+                document.getElementById('camOffsetPitch').value = config.camera_offset[4];
+                document.getElementById('camOffsetRoll').value = config.camera_offset[5];
+            }
+
+            // IMU Data
+            if (config.imu && config.imu.length >= 6) {
+                document.getElementById('imuYaw').value = config.imu[0];
+                document.getElementById('imuPitch').value = config.imu[1];
+                document.getElementById('imuRoll').value = config.imu[2];
+                document.getElementById('imuGyroX').value = config.imu[3];
+                document.getElementById('imuGyroY').value = config.imu[4];
+                document.getElementById('imuGyroZ').value = config.imu[5];
+            }
+
+            // Targets
+            renderTargets();
+            renderDetections();
+            renderClassifications();
+            renderBarcodes();
+        }
+
+        function openTab(tabId, element) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Remove active class from all tabs
+            const tabLinks = document.querySelectorAll('.tab-link');
+            tabLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            // Show target tab and set active class on clicked button
+            document.getElementById(tabId).classList.add('active');
+            element.classList.add('active');
+        }
+
+        function sendConfiguration() {
+            // Gather Robot Pose
+            config.robot_pose = [
+                parseFloat(document.getElementById('robotX').value),
+                parseFloat(document.getElementById('robotY').value),
+                parseFloat(document.getElementById('robotYaw').value)
+            ];
+
+            // Gather Camera Offset
+            config.camera_offset = [
+                parseFloat(document.getElementById('camOffsetX').value),
+                parseFloat(document.getElementById('camOffsetY').value),
+                parseFloat(document.getElementById('camOffsetZ').value),
+                parseFloat(document.getElementById('camOffsetYaw').value),
+                parseFloat(document.getElementById('camOffsetPitch').value),
+                parseFloat(document.getElementById('camOffsetRoll').value)
+            ];
+
+            // Gather IMU data
+            config.imu = [
+                parseFloat(document.getElementById('imuYaw').value),
+                parseFloat(document.getElementById('imuPitch').value),
+                parseFloat(document.getElementById('imuRoll').value),
+                parseFloat(document.getElementById('imuGyroX').value),
+                parseFloat(document.getElementById('imuGyroY').value),
+                parseFloat(document.getElementById('imuGyroZ').value),
+                0, 0, 0, 0
+            ];
+
+            fetch('/api/configure', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(config)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    showMessage('success', 'Configuration sent successfully!');
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showMessage('error', 'Failed to send configuration');
+                });
+        }
+
+        function importFmap(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    let importedTargets = [];
+
+                    // WPILib format: { "tags": [ { "ID": 1, "pose": { "translation": { "x": ..., "y": ..., "z": ... } } } ] }
+                    if (data.tags && Array.isArray(data.tags)) {
+                        data.tags.forEach(tag => {
+                            if (tag.ID !== undefined && tag.pose && tag.pose.translation) {
+                                importedTargets.push({
+                                    id: tag.ID,
+                                    x: tag.pose.translation.x,
+                                    y: tag.pose.translation.y,
+                                    z: tag.pose.translation.z
+                                });
+                            }
+                        });
+                    } 
+                    // Limelight/PhotonVision format: { "fiducials": [ { "id": 1, "transform": [ ... ] } ] }
+                    else if (data.fiducials && Array.isArray(data.fiducials)) {
+                        data.fiducials.forEach(f => {
+                            let tx=0, ty=0, tz=0;
+                            if (f.transform && f.transform.length === 16) {
+                                // Transform typically col-major or row-major. Check if element [15] is 1.0 (col-major typical layout).
+                                if (Math.abs(f.transform[15] - 1.0) < 0.001 && (f.transform[12] !== 0 || f.transform[13] !== 0 || f.transform[14] !== 0)) {
+                                    tx = f.transform[12];
+                                    ty = f.transform[13];
+                                    tz = f.transform[14];
+                                } else {
+                                    tx = f.transform[3];
+                                    ty = f.transform[7];
+                                    tz = f.transform[11];
+                                }
+                            }
+                            importedTargets.push({
+                                id: f.id,
+                                x: tx,
+                                y: ty,
+                                z: tz
+                            });
+                        });
+                    }
+
+                    if (importedTargets.length > 0) {
+                        config.targets = importedTargets;
+                        renderTargets();
+                        showMessage('success', 'Successfully imported ' + importedTargets.length + ' targets');
+                    } else {
+                        showMessage('error', 'Invalid file format: Could not find valid tags/fiducials.');
+                    }
+                } catch (err) {
+                    showMessage('error', 'Failed to parse file: ' + err.message);
+                }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function addTarget() {
+            config.targets.push({ id: config.targets.length, x: 0, y: 0 });
+            renderTargets();
+        }
+
+        function removeTarget(index) {
+            config.targets.splice(index, 1);
+            renderTargets();
+        }
+
+        function renderTargets() {
+            const list = document.getElementById('targetsList');
+            list.innerHTML = '';
+            config.targets.forEach((target, index) => {
+                list.innerHTML += `
+                    <div class="array-item">
+                        <div class="array-item-header">
+                            <span class="array-item-title">Target ${index + 1}</span>
+                            <button class="remove-btn" onclick="removeTarget(${index})">Remove</button>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>ID</label>
+                                <input type="number" value="${target.id}" onchange="config.targets[${index}].id = parseInt(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>X (m)</label>
+                                <input type="number" value="${target.x}" step="0.1" onchange="config.targets[${index}].x = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Y (m)</label>
+                                <input type="number" value="${target.y}" step="0.1" onchange="config.targets[${index}].y = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Z (m)</label>
+                                <input type="number" value="${target.z}" step="0.1" onchange="config.targets[${index}].z = parseFloat(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addDetection() {
+            config.detections.push({
+                classId: 0,
+                className: 'Object',
+                confidence: 0.9,
+                tx: 0,
+                ty: 0,
+                ta: 0
+            });
+            renderDetections();
+        }
+
+        function removeDetection(index) {
+            config.detections.splice(index, 1);
+            renderDetections();
+        }
+
+        function renderDetections() {
+            const list = document.getElementById('detectionsList');
+            list.innerHTML = '';
+            config.detections.forEach((det, index) => {
+                list.innerHTML += `
+                    <div class="array-item">
+                        <div class="array-item-header">
+                            <span class="array-item-title">Detection ${index + 1}</span>
+                            <button class="remove-btn" onclick="removeDetection(${index})">Remove</button>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Class ID</label>
+                                <input type="number" value="${det.classId}" onchange="config.detections[${index}].classId = parseInt(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Class Name</label>
+                                <input type="text" value="${det.className}" onchange="config.detections[${index}].className = this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>Confidence</label>
+                                <input type="number" value="${det.confidence}" min="0" max="1" step="0.01" onchange="config.detections[${index}].confidence = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>TX (°)</label>
+                                <input type="number" value="${det.tx}" step="0.1" onchange="config.detections[${index}].tx = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>TY (°)</label>
+                                <input type="number" value="${det.ty}" step="0.1" onchange="config.detections[${index}].ty = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>TA (°)</label>
+                                <input type="number" value="${det.ta}" step="0.1" onchange="config.detections[${index}].ta = parseFloat(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addClassification() {
+            config.classifications.push({
+                classId: 0,
+                className: 'Class',
+                confidence: 0.9
+            });
+            renderClassifications();
+        }
+
+        function removeClassification(index) {
+            config.classifications.splice(index, 1);
+            renderClassifications();
+        }
+
+        function renderClassifications() {
+            const list = document.getElementById('classificationsList');
+            list.innerHTML = '';
+            config.classifications.forEach((clf, index) => {
+                list.innerHTML += `
+                    <div class="array-item">
+                        <div class="array-item-header">
+                            <span class="array-item-title">Classification ${index + 1}</span>
+                            <button class="remove-btn" onclick="removeClassification(${index})">Remove</button>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Class ID</label>
+                                <input type="number" value="${clf.classId}" onchange="config.classifications[${index}].classId = parseInt(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Class Name</label>
+                                <input type="text" value="${clf.className}" onchange="config.classifications[${index}].className = this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>Confidence</label>
+                                <input type="number" value="${clf.confidence}" min="0" max="1" step="0.01" onchange="config.classifications[${index}].confidence = parseFloat(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addBarcode() {
+            config.barcodes.push({
+                family: 'AprilTag',
+                data: '0',
+                tx: 0,
+                ty: 0,
+                ta: 0
+            });
+            renderBarcodes();
+        }
+
+        function removeBarcode(index) {
+            config.barcodes.splice(index, 1);
+            renderBarcodes();
+        }
+
+        function renderBarcodes() {
+            const list = document.getElementById('barcodesList');
+            list.innerHTML = '';
+            config.barcodes.forEach((bc, index) => {
+                list.innerHTML += `
+                    <div class="array-item">
+                        <div class="array-item-header">
+                            <span class="array-item-title">Barcode ${index + 1}</span>
+                            <button class="remove-btn" onclick="removeBarcode(${index})">Remove</button>
+                        </div>
+                        <div class="grid-3">
+                            <div class="form-group">
+                                <label>Family</label>
+                                <input type="text" value="${bc.family}" onchange="config.barcodes[${index}].family = this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>Data</label>
+                                <input type="text" value="${bc.data}" onchange="config.barcodes[${index}].data = this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>TX (°)</label>
+                                <input type="number" value="${bc.tx}" step="0.1" onchange="config.barcodes[${index}].tx = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>TY (°)</label>
+                                <input type="number" value="${bc.ty}" step="0.1" onchange="config.barcodes[${index}].ty = parseFloat(this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>TA (°)</label>
+                                <input type="number" value="${bc.ta}" step="0.1" onchange="config.barcodes[${index}].ta = parseFloat(this.value)">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function showMessage(type, message) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+
+            if (type === 'success') {
+                successMsg.textContent = '✓ ' + message;
+                successMsg.style.display = 'block';
+                errorMsg.style.display = 'none';
+                setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
+            } else {
+                errorMsg.textContent = '✗ ' + message;
+                errorMsg.style.display = 'block';
+                successMsg.style.display = 'none';
+                setTimeout(() => { errorMsg.style.display = 'none'; }, 3000);
+            }
+        }
+    </script>
+</body>
+</html>
